@@ -1,0 +1,23 @@
+1.  Python env
+```
+python3 -m venv .venv
+source .venv/bin/activate
+python3.11 -m pip install -r requirements.txt
+```
+
+2. Setup Twilio auth in a twilio_auth_token file
+```
+export TWILIO_ACCOUNT_SID=ABCD123
+export TWILIO_AUTH_TOKEN=EFGH456
+export TWILIO_PHONE_NUMBER=+11234567890
+```
+
+3. Setup env
+```
+source twilio_auth_token
+```
+
+4. Start app
+```
+python3.11 hashtagprinter.py; ngrok http 8080
+```

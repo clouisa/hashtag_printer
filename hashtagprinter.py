@@ -5,13 +5,14 @@ import random
 import os.path
 import argparse
 import datetime
-import multiprocessing
 import traceback
+import logging
 import validators
 import pickle
 import time
 import os, errno
 import glob
+import multiprocess as mp 
 from PIL import Image, ImageDraw, ImageFont, ImageOps, ImageFilter
 import requests
 from flask import Flask, request, session, url_for
@@ -20,16 +21,17 @@ from crawlerpublic import CrawlerPublic
 from sqlitequeue import SqliteQueue
 from roundrobinqueue import RoundRobinQueue
 
-WELCOME_MESSAGE = "Welcome to Ella & Sasha's Wedding! Try sending pictures and/or videos."
+WELCOME_MESSAGE = "Welcome to Kevin & Louisa's Wedding! Try sending pictures and/or videos."
 BACKGROUNDS_PATH = 'backgrounds'
 LOW_PRIORITY_DOWNLOAD_QUEUE_DB_PATH = 'db1.sqlite3'
 HIGH_PRIORITY_DOWNLOAD_QUEUE_DB_PATH = 'db2.sqlite3'
 PICTURES_SMS_PATH = 'pictures/sms'
-HOT_FOLDER_PATH = '/Users/gkaftan/Documents/InstantPrint/Pending'
+HOT_FOLDER_PATH = '/Users/Shared/InstantPrint/Pending'
 MAX_FEED = 20 # 20
 SPOOL_LENGTH = 2 # 2
 IGNORE_OLD_POSTS = True
 WIDTH, HEIGHT = 1844, 1240
+PORT_NUMBER = 8080
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -309,7 +311,7 @@ def sms_joke():
 
 
 def sms_process():
-    app.run(threaded=True)
+    app.run(threaded=True, debug=True, port=PORT_NUMBER)
 
 
 def instagram_process():
@@ -464,7 +466,7 @@ def download_process():
 
 
 if __name__ == '__main__':
-
+    app.logger.info("Starting Hashtag Printer...")
     parser = argparse.ArgumentParser(description='Hashtag Printer')
     parser.add_argument('-hashtag', '--hashtag', dest='hashtag', type=str, required=False)
     args = parser.parse_args()
@@ -493,13 +495,13 @@ if __name__ == '__main__':
             raise
 
     # Start Flask process
-    download_process = multiprocessing.Process(target=download_process)
+    download_process = mp.Process(target=download_process)
     download_process.start()
 
-    sms_process = multiprocessing.Process(target=sms_process)
+    sms_process = mp.Process(target=sms_process)
     sms_process.start()
     if args.hashtag:
-        instagram_process = multiprocessing.Process(target=instagram_process)
+        instagram_process = mp.Process(target=instagram_process)
         instagram_process.start()
 
     download_process.join()
